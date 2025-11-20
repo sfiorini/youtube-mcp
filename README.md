@@ -1,5 +1,6 @@
 # YouTube MCP Server
 
+[![smithery badge](https://smithery.ai/badge/@sfiorini/youtube-mcp)](https://smithery.ai/server/@sfiorini/youtube-mcp)
 [![smithery badge](https://smithery.ai/badge/@sfiorini/youtube)](https://smithery.ai/server/@sfiorini/youtube)
 
 A Model Context Protocol (MCP) server implementation for YouTube, enabling AI language models to interact with YouTube content through a standardized interface.
