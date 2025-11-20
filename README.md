@@ -85,6 +85,20 @@ To install YouTube MCP Server for Claude Desktop automatically via [Smithery](ht
 npx -y @smithery/cli install @sfiorini/youtube --client claude
 ```
 
+**Smithery Deployment Status**: ✅ Ready for deployment
+
+The project is now Smithery-compatible with:
+- ✅ TypeScript runtime configuration
+- ✅ Proper `createServer` function export
+- ✅ Configuration schema for API keys
+- ✅ All tools registered with proper schemas
+- ✅ Smithery build integration
+
+Deploy to Smithery:
+1. Push code to GitHub
+2. Visit https://smithery.ai/new
+3. Connect your repository and deploy
+
 ## Configuration
 
 Set the following environment variables:

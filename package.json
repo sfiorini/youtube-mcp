@@ -4,6 +4,7 @@
   "description": "YouTube MCP Server Implementation",
   "type": "module",
   "main": "dist/index.js",
+  "module": "./src/smithery-index.ts",
   "bin": {
     "youtube-mcp": "dist/cli.js"
   },
@@ -16,19 +17,23 @@
     "start": "node ./dist/index.js",
     "build": "tsc",
     "dev": "nodemon --exec \"npm run build && npm start\" --ext ts",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "smithery:build": "npx smithery build",
+    "smithery:dev": "npx smithery dev"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.1.1",
     "googleapis": "^129.0.0",
     "ytdl-core": "^4.11.5",
-    "youtube-transcript": "^1.0.6"
+    "youtube-transcript": "^1.0.6",
+    "zod": "^3.25.46"
   },
   "devDependencies": {
     "@types/node": "^18.0.0",
     "typescript": "^5.0.0",
     "ts-node": "^10.9.1",
-    "nodemon": "^3.0.0"
+    "nodemon": "^3.0.0",
+    "@smithery/cli": "^1.4.6"
   },
   "keywords": [
     "youtube",
