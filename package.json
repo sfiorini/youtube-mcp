@@ -1,11 +1,11 @@
 {
-  "name": "zubeid-youtube-mcp-server",
-  "version": "1.0.0",
+  "name": "@sfiorini/youtube-mcp",
+  "version": "0.1.0",
   "description": "YouTube MCP Server Implementation",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
-    "zubeid-youtube-mcp-server": "dist/cli.js"
+    "youtube-mcp": "dist/cli.js"
   },
   "files": [
     "dist",
@@ -38,14 +38,14 @@
     "claude",
     "anthropic"
   ],
-  "author": "Zubeid Hendricks",
+  "author": "Stefano Fiorini",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ZubeidHendricks/youtube-mcp-server.git"
+    "url": "git+https://github.com/sfiorini/youtube-mcp.git"
   },
   "bugs": {
-    "url": "https://github.com/ZubeidHendricks/youtube-mcp-server/issues"
+    "url": "https://github.com/sfiorini/youtube-mcp/issues"
   },
-  "homepage": "https://github.com/ZubeidHendricks/youtube-mcp-server#readme"
+  "homepage": "https://github.com/sfiorini/youtube-mcp#readme"
 }

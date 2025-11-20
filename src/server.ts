@@ -21,8 +21,8 @@ import {
 export async function startMcpServer() {
     const server = new Server(
         {
-            name: 'zubeid-youtube-mcp-server',
-            version: '1.0.0',
+            name: 'youtube-mcp',
+            version: '0.1.0',
         },
         {
             capabilities: {

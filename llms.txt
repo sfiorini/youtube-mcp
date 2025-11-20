@@ -8,7 +8,7 @@ This server can be deployed in two ways:
 
 1. As a local npm package:
    ```
-   npm install zubeid-youtube-mcp-server
+   npm install @sfiorini/youtube-mcp
    ```
 
 2. Via Docker deployment on Smithery:

@@ -44,6 +44,7 @@ The project uses a **service-based architecture** with the following layers:
 ### MCP Tool Registration
 
 Tools are registered in `src/server.ts` through the `ListToolsRequestSchema` handler (lines 39-165). Each tool has:
+
 - A name following the pattern `{service}_{operation}` (e.g., `videos_getVideo`)
 - A description for the AI model
 - An input schema defining expected parameters
@@ -53,6 +54,7 @@ Tool execution is handled in `CallToolRequestSchema` handler (lines 167-254) wit
 ### API Integration
 
 Services use the **Google APIs Node.js client library** (`googleapis` package) with lazy initialization:
+
 - The YouTube API client is initialized only when needed (not in constructor)
 - API key is read from `YOUTUBE_API_KEY` environment variable at initialization time
 - Each service maintains its own `youtube` client instance
@@ -60,6 +62,7 @@ Services use the **Google APIs Node.js client library** (`googleapis` package) w
 ### Module System
 
 The project uses **ES modules** (ESNext) as configured in:
+
 - `package.json`: `"type": "module"`
 - `tsconfig.json`: `"module": "ESNext"`, `"moduleResolution": "bundler"`
 - All imports use `.js` extensions (e.g., `import { VideoService } from './services/video.js'`)
@@ -79,9 +82,11 @@ The project uses **ES modules** (ESNext) as configured in:
 ## Configuration
 
 **Required Environment Variable:**
+
 - `YOUTUBE_API_KEY`: Your YouTube Data API v3 key (must be set before starting the server)
 
 **Optional Environment Variable:**
+
 - `YOUTUBE_TRANSCRIPT_LANG`: Default language for transcripts (defaults to 'en')
 
 ## Available Tools
@@ -98,7 +103,8 @@ The MCP server exposes these tools to clients:
 
 ## Build and Distribution
 
-The project is published as an npm package (`zubeid-youtube-mcp-server`) and can be installed globally or used via npx. The build process:
+The project is published as an npm package (`@sfiorini/youtube-mcp`) and can be installed globally or used via npx. The build process:
+
 1. TypeScript compiles to JavaScript in `dist/` directory
 2. Binary entry point is set via `bin` field in package.json
 3. The `main` field points to `dist/index.js`
@@ -106,6 +112,7 @@ The project is published as an npm package (`zubeid-youtube-mcp-server`) and can
 ## Testing and Validation
 
 The project was recently migrated to ES modules to fix compatibility issues with LibreChat and improve module resolution. When making changes:
+
 - Ensure all imports use `.js` extensions for relative imports
 - Verify TypeScript compiles without errors: `npm run build`
 - Test the server can start: `npm start` (requires valid YOUTUBE_API_KEY)

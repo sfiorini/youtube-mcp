@@ -1,27 +1,32 @@
 # YouTube MCP Server
+
 A Model Context Protocol (MCP) server implementation for YouTube, enabling AI language models to interact with YouTube content through a standardized interface.
 
 ## Features
 
 ### Video Information
+
 * Get video details (title, description, duration, etc.)
 * List channel videos
 * Get video statistics (views, likes, comments)
 * Search videos across YouTube
 
 ### Transcript Management
+
 * Retrieve video transcripts
 * Support for multiple languages
 * Get timestamped captions
 * Search within transcripts
 
 ### Channel Management
+
 * Get channel details
 * List channel playlists
 * Get channel statistics
 * Search within channel content
 
 ### Playlist Management
+
 * List playlist items
 * Get playlist details
 * Search within playlists
@@ -30,15 +35,18 @@ A Model Context Protocol (MCP) server implementation for YouTube, enabling AI la
 ## Installation
 
 ```bash
-npm install @modelcontextprotocol/server-youtube
+npm install @sfiorini/youtube-mcp
 ```
 
 ## Configuration
+
 Set the following environment variables:
+
 * `YOUTUBE_API_KEY`: Your YouTube Data API key
 * `YOUTUBE_TRANSCRIPT_LANG`: Default language for transcripts (optional, defaults to 'en')
 
 ## Using with MCP Client
+
 Add this to your MCP client configuration (e.g. Claude Desktop):
 
 ```json
@@ -46,7 +54,7 @@ Add this to your MCP client configuration (e.g. Claude Desktop):
   "mcpServers": {
     "youtube": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-youtube"],
+      "args": ["-y", "@sfiorini/youtube-mcp"],
       "env": {
         "YOUTUBE_API_KEY": "<YOUR_API_KEY>"
       }
@@ -56,6 +64,7 @@ Add this to your MCP client configuration (e.g. Claude Desktop):
 ```
 
 ## YouTube API Setup
+
 1. Go to Google Cloud Console
 2. Create a new project or select an existing one
 3. Enable the YouTube Data API v3
@@ -65,6 +74,7 @@ Add this to your MCP client configuration (e.g. Claude Desktop):
 ## Examples
 
 ### Managing Videos
+
 ```javascript
 // Get video details
 const video = await youtube.videos.getVideo({
@@ -85,6 +95,7 @@ const searchResults = await youtube.videos.searchVideos({
 ```
 
 ### Managing Channels
+
 ```javascript
 // Get channel details
 const channel = await youtube.channels.getChannel({
@@ -99,6 +110,7 @@ const videos = await youtube.channels.listVideos({
 ```
 
 ### Managing Playlists
+
 ```javascript
 // Get playlist items
 const playlistItems = await youtube.playlists.getPlaylistItems({
@@ -113,6 +125,7 @@ const playlist = await youtube.playlists.getPlaylist({
 ```
 
 ## Development
+
 ```bash
 # Install dependencies
 npm install
@@ -128,7 +141,9 @@ npm run lint
 ```
 
 ## Contributing
+
 See CONTRIBUTING.md for information about contributing to this repository.
 
 ## License
+
 This project is licensed under the MIT License - see the LICENSE file for details.
