@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.5] - 2025-11-21
+
+### Removed
+
+- **BREAKING**: Removed CLI entry point and `bin` field from package.json
+- **BREAKING**: Removed deprecated `src/server.ts` and `src/cli.ts` files
+- Simplified package structure to focus on MCP server functionality
+- Package now only exports the `createServer` function for Smithery/MCP clients
+
+### Fixed
+
+- Resolved "Cannot find module '../../package.json'" error in npm package
+- Eliminated dependency resolution issues that caused crashes in Node.js environments
+- Fixed build errors by removing references to deleted server files
+
 ## [0.1.4] - 2025-11-21
 
 ### Fixed
