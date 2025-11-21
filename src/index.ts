@@ -15,7 +15,7 @@ export const configSchema = z.object({
 export default function createServer({ config }: { config?: z.infer<typeof configSchema> }) {
     const server = new McpServer({
         name: 'youtube-mcp',
-        version: '0.1.7',
+        version: '0.1.8',
     });
 
     const videoService = new VideoService();
@@ -39,13 +39,7 @@ export default function createServer({ config }: { config?: z.infer<typeof confi
             videoId: z.string().describe("The YouTube video ID"),
             parts: z.array(z.string()).optional().describe("Parts of the video to retrieve"),
         },
-        outputSchema: z.object({
-                content: z.array(z.object({
-                    type: z.string(),
-                    text: z.string()
-                }))
-            })
-    }, async ({ videoId, parts }: { videoId: string; parts?: string[] }) => {
+            }, async ({ videoId, parts }: { videoId: string; parts?: string[] }) => {
         const result = await videoService.getVideo({ videoId, parts });
         return {
             content: [{
@@ -62,13 +56,7 @@ export default function createServer({ config }: { config?: z.infer<typeof confi
             query: z.string().describe("Search query"),
             maxResults: z.number().optional().describe("Maximum number of results to return"),
         },
-        outputSchema: z.object({
-                content: z.array(z.object({
-                    type: z.string(),
-                    text: z.string()
-                }))
-            })
-    }, async ({ query, maxResults }: { query: string; maxResults?: number }) => {
+            }, async ({ query, maxResults }: { query: string; maxResults?: number }) => {
         const result = await videoService.searchVideos({ query, maxResults });
         return {
             content: [{
@@ -85,13 +73,7 @@ export default function createServer({ config }: { config?: z.infer<typeof confi
             videoId: z.string().describe("The YouTube video ID"),
             language: z.string().optional().describe("Language code for the transcript"),
         },
-        outputSchema: z.object({
-                content: z.array(z.object({
-                    type: z.string(),
-                    text: z.string()
-                }))
-            })
-    }, async ({ videoId, language }: { videoId: string; language?: string }) => {
+            }, async ({ videoId, language }: { videoId: string; language?: string }) => {
         const result = await transcriptService.getTranscript({ videoId, language });
         return {
             content: [{
@@ -107,13 +89,7 @@ export default function createServer({ config }: { config?: z.infer<typeof confi
         inputSchema: {
             channelId: z.string().describe("The YouTube channel ID"),
         },
-        outputSchema: z.object({
-                content: z.array(z.object({
-                    type: z.string(),
-                    text: z.string()
-                }))
-            })
-    }, async ({ channelId }: { channelId: string }) => {
+            }, async ({ channelId }: { channelId: string }) => {
         const result = await channelService.getChannel({ channelId });
         return {
             content: [{
@@ -130,13 +106,7 @@ export default function createServer({ config }: { config?: z.infer<typeof confi
             channelId: z.string().describe("The YouTube channel ID"),
             maxResults: z.number().optional().describe("Maximum number of results to return"),
         },
-        outputSchema: z.object({
-                content: z.array(z.object({
-                    type: z.string(),
-                    text: z.string()
-                }))
-            })
-    }, async ({ channelId, maxResults }: { channelId: string; maxResults?: number }) => {
+            }, async ({ channelId, maxResults }: { channelId: string; maxResults?: number }) => {
         const result = await channelService.listVideos({ channelId, maxResults });
         return {
             content: [{
@@ -152,13 +122,7 @@ export default function createServer({ config }: { config?: z.infer<typeof confi
         inputSchema: {
             playlistId: z.string().describe("The YouTube playlist ID"),
         },
-        outputSchema: z.object({
-                content: z.array(z.object({
-                    type: z.string(),
-                    text: z.string()
-                }))
-            })
-    }, async ({ playlistId }: { playlistId: string }) => {
+            }, async ({ playlistId }: { playlistId: string }) => {
         const result = await playlistService.getPlaylist({ playlistId });
         return {
             content: [{
@@ -175,13 +139,7 @@ export default function createServer({ config }: { config?: z.infer<typeof confi
             playlistId: z.string().describe("The YouTube playlist ID"),
             maxResults: z.number().optional().describe("Maximum number of results to return"),
         },
-        outputSchema: z.object({
-                content: z.array(z.object({
-                    type: z.string(),
-                    text: z.string()
-                }))
-            })
-    }, async ({ playlistId, maxResults }: { playlistId: string; maxResults?: number }) => {
+            }, async ({ playlistId, maxResults }: { playlistId: string; maxResults?: number }) => {
         const result = await playlistService.getPlaylistItems({ playlistId, maxResults });
         return {
             content: [{
