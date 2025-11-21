@@ -1,0 +1,89 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [0.1.2] - 2025-11-20
+
+### Added
+
+- Enhanced video responses with direct YouTube URLs
+- Structured video objects with `url` and `videoId` fields
+- TypeScript example documentation for enhanced responses
+- Comprehensive documentation updates
+
+### Changed
+
+- **BREAKING**: Migrated from deprecated `Server` to modern `McpServer` class
+- **BREAKING**: Updated tool registration from `setRequestHandler` to `registerTool`
+- Replaced manual schema validation with `zod` type-safe schemas
+- Dynamic version management from `package.json`
+- Updated all video service methods to return enhanced structured responses
+
+### Improved
+
+- Type-safe tool registration with proper input validation
+- Better error handling and user feedback
+- Enhanced logging with dynamic version information
+- Modern ES module patterns throughout codebase
+
+## [0.1.1] - 2025-11-19
+
+### Added
+
+- Enhanced video responses with `url` and `videoId` fields
+- Support for direct YouTube video URLs in all video operations
+- `VideoService.createStructuredVideo()` helper method
+- `VideoService.createStructuredVideos()` helper method
+
+### Changed
+
+- Updated `getVideo()` method to return enhanced response with URL
+- Updated `searchVideos()` method to return enhanced responses with URLs
+- Updated `getTrendingVideos()` method to include URLs
+- Updated `getRelatedVideos()` method to include URLs
+- Enhanced tool descriptions to highlight URL support
+
+### Fixed
+
+- Consistent video ID extraction from different YouTube API response formats
+- Maintained backward compatibility with existing YouTube API data
+
+### Documentation
+
+- Added comprehensive enhanced response structure documentation
+- Updated examples to show new URL-inclusive responses
+- Added TypeScript interface documentation
+- Created example TypeScript file demonstrating enhanced usage
+
+## [0.1.0] - 2025-11-19
+
+### Added
+
+- Initial MCP server implementation for YouTube
+- Video operations: get video details, search videos
+- Transcript management with multi-language support
+- Channel operations: get channel info, list videos
+- Playlist operations: get playlist details, list items
+- Full TypeScript support with proper type definitions
+- ES module compatibility
+- Environment variable validation
+- Comprehensive error handling
+- npm package publishing with `@sfiorini/youtube-mcp`
+
+### Features
+
+- YouTube Data API v3 integration
+- Lazy API client initialization
+- Multiple installation methods (npm, npx, smithery)
+- Claude Desktop and VS Code integration
+- Development tooling with hot reload
+
+### Documentation
+
+- Complete README with installation and usage examples
+- Developer documentation in CLAUDE.md
+- Project architecture documentation
+- API setup instructions

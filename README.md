@@ -8,10 +8,11 @@ A Model Context Protocol (MCP) server implementation for YouTube, enabling AI la
 
 ### Video Information
 
-* Get video details (title, description, duration, etc.)
-* List channel videos
+* Get video details (title, description, duration, etc.) **with direct URLs**
+* List channel videos **with direct URLs**
 * Get video statistics (views, likes, comments)
-* Search videos across YouTube
+* Search videos across YouTube **with direct URLs**
+* **NEW**: Enhanced video responses include `url` and `videoId` fields for easy integration
 
 ### Transcript Management
 
@@ -165,10 +166,15 @@ Optionally, you can add it to a file called `.vscode/mcp.json` in your workspace
 ### Managing Videos
 
 ```javascript
-// Get video details
+// Get video details (now includes URL)
 const video = await youtube.videos.getVideo({
-  videoId: "video-id"
+  videoId: "dQw4w9WgXcQ"
 });
+
+// Enhanced response now includes:
+// - video.url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+// - video.videoId: "dQw4w9WgXcQ"
+// - All original YouTube API data
 
 // Get video transcript
 const transcript = await youtube.transcripts.getTranscript({
@@ -176,11 +182,16 @@ const transcript = await youtube.transcripts.getTranscript({
   language: "en"
 });
 
-// Search videos
+// Search videos (results now include URLs)
 const searchResults = await youtube.videos.searchVideos({
   query: "search term",
   maxResults: 10
 });
+
+// Each search result includes:
+// - result.url: "https://www.youtube.com/watch?v={videoId}"
+// - result.videoId: "{videoId}"
+// - All original YouTube search data
 ```
 
 ### Managing Channels
@@ -213,21 +224,107 @@ const playlist = await youtube.playlists.getPlaylist({
 });
 ```
 
+## Enhanced Response Structure
+
+### Video Objects with URLs
+
+All video-related responses now include enhanced fields for easier integration:
+
+```typescript
+interface EnhancedVideoResponse {
+  // Original YouTube API fields
+  kind?: string;
+  etag?: string;
+  id?: string | YouTubeSearchResultId;
+  snippet?: YouTubeSnippet;
+  contentDetails?: any;
+  statistics?: any;
+
+  // NEW: Enhanced fields
+  url: string;           // Direct YouTube video URL
+  videoId: string;       // Extracted video ID
+}
+```
+
+### Example Enhanced Response
+
+```json
+{
+  "kind": "youtube#video",
+  "id": "dQw4w9WgXcQ",
+  "snippet": {
+    "title": "Never Gonna Give You Up",
+    "channelTitle": "Rick Astley",
+    "description": "Official video for \"Never Gonna Give You Up\""
+  },
+  "statistics": {
+    "viewCount": "1.5B",
+    "likeCount": "15M"
+  },
+  // Enhanced fields:
+  "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+  "videoId": "dQw4w9WgXcQ"
+}
+```
+
+### Benefits
+
+* **Easy URL Access**: No need to manually construct URLs
+* **Consistent Structure**: Both search and individual video responses include URLs
+* **Backward Compatible**: All existing YouTube API data is preserved
+* **Type Safe**: Full TypeScript support available
+
 ## Development
 
 ```bash
 # Install dependencies
 npm install
 
-# Run tests
-npm test
-
-# Build
+# Build TypeScript to JavaScript
 npm run build
 
-# Lint
-npm run lint
+# Development mode with auto-rebuild and hot reload
+npm run dev
+
+# Start the server (requires YOUTUBE_API_KEY)
+npm start
+
+# Publish to npm (runs build first)
+npm run prepublishOnly
 ```
+
+### Architecture
+
+This project uses a **modern MCP SDK architecture** with the following features:
+
+* **Modern McpServer**: Updated from deprecated `Server` class to the new `McpServer`
+* **Dynamic Version Management**: Version automatically read from `package.json`
+* **Type-Safe Tool Registration**: Uses `zod` schemas for input validation
+* **ES Modules**: Full ES module support with proper `.js` extensions
+* **Enhanced Video Responses**: All video operations include `url` and `videoId` fields
+* **Lazy Initialization**: YouTube API client initialized only when needed
+
+### Project Structure
+
+```
+src/
+├── server.ts              # MCP server setup and tool registration
+├── services/              # Core business logic
+│   ├── video.ts          # Video operations (search, getVideo)
+│   ├── transcript.ts     # Transcript retrieval
+│   ├── playlist.ts       # Playlist operations
+│   └── channel.ts        # Channel operations
+├── types.ts              # TypeScript interfaces
+└── index.ts              # Entry point with environment validation
+```
+
+### Key Features
+
+* **Enhanced Video Responses**: All video objects include direct YouTube URLs
+* **Type-Safe Development**: Full TypeScript support with `zod` validation
+* **Modern MCP Tools**: Uses `registerTool` instead of manual request handlers
+* **Environment Validation**: Validates required API keys at startup
+* **Error Handling**: Comprehensive error handling with descriptive messages
 
 ## Contributing
 

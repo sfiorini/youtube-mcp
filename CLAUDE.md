@@ -29,27 +29,79 @@ npm run prepublishOnly
 
 ### Core Structure
 
-The project uses a **service-based architecture** with the following layers:
+The project uses a **modern service-based architecture** with the following layers:
 
 1. **Entry Point** (`src/index.ts`): Validates required environment variables and starts the MCP server
-2. **Server** (`src/server.ts`): Sets up the MCP server, defines available tools, and routes tool calls to appropriate services
+2. **Server** (`src/server.ts`): Uses modern `McpServer` with type-safe tool registration
 3. **Services** (`src/services/`): Core business logic for interacting with YouTube APIs
-   - `VideoService`: Handles video operations (get video details, search videos)
+   - `VideoService`: Handles video operations with **enhanced URL support** (get video details, search videos)
    - `TranscriptService`: Retrieves and manages video transcripts
    - `PlaylistService`: Manages playlist operations
    - `ChannelService`: Handles channel-related operations
 4. **Types** (`src/types.ts`): TypeScript interfaces for function parameters and data structures
 5. **Functions** (`src/functions/`): Additional functionality (currently excluded from compilation but available for future extensions)
 
+### Enhanced Video Responses
+
+**NEW**: All video operations return enhanced objects that include:
+
+- `url`: Direct YouTube video URL (`https://www.youtube.com/watch?v={videoId}`)
+- `videoId`: Extracted video ID for easy reference
+- All original YouTube API data (backward compatible)
+
+This enhancement applies to:
+
+- `getVideo()` method returns single video with URL
+- `searchVideos()` method returns array of videos with URLs
+- `getTrendingVideos()` method returns trending videos with URLs
+- `getRelatedVideos()` method returns related videos with URLs
+
+### Modern MCP SDK Migration
+
+**Updated from deprecated to modern patterns:**
+
+- ✅ `new Server()` → `new McpServer()`
+- ✅ `setRequestHandler()` → `registerTool()`
+- ✅ Manual schema definition → `zod` validation schemas
+- ✅ Static version → Dynamic version from `package.json`
+- ✅ Basic error handling → Comprehensive error handling
+
 ### MCP Tool Registration
 
-Tools are registered in `src/server.ts` through the `ListToolsRequestSchema` handler (lines 39-165). Each tool has:
+Tools are registered in `src/server.ts` using the modern `McpServer.registerTool()` method (lines 25-187). Each tool has:
 
 - A name following the pattern `{service}_{operation}` (e.g., `videos_getVideo`)
-- A description for the AI model
-- An input schema defining expected parameters
+- A title and description for the AI model
+- Type-safe `zod` input schemas for validation
+- Async handler functions that return structured MCP responses
 
-Tool execution is handled in `CallToolRequestSchema` handler (lines 167-254) with a switch statement routing to the appropriate service method.
+**Modern Tool Registration Pattern:**
+
+```typescript
+server.registerTool(
+  'videos_getVideo',
+  {
+    title: 'Get Video Details',
+    description: 'Get detailed information about a YouTube video including URL',
+    inputSchema: {
+      videoId: z.string().describe('The YouTube video ID'),
+      parts: z.array(z.string()).optional().describe('Parts of the video to retrieve'),
+    },
+    outputSchema: z.any()
+  },
+  async ({ videoId, parts }) => {
+    const result = await videoService.getVideo({ videoId, parts });
+    return {
+      content: [{
+        type: 'text',
+        text: JSON.stringify(result, null, 2)
+      }]
+    };
+  }
+);
+```
+
+This replaces the deprecated `setRequestHandler` approach with type-safe tool registration.
 
 ### API Integration
 
@@ -91,15 +143,45 @@ The project uses **ES modules** (ESNext) as configured in:
 
 ## Available Tools
 
-The MCP server exposes these tools to clients:
+The MCP server exposes these tools to clients with enhanced functionality:
 
-- `videos_getVideo`: Get detailed video information
-- `videos_searchVideos`: Search for videos
+### Video Tools (Enhanced with URLs)
+
+- `videos_getVideo`: Get detailed video information **including direct URL**
+- `videos_searchVideos`: Search for videos **with URLs in results**
+
+### Other Tools
+
 - `transcripts_getTranscript`: Retrieve video transcript
 - `channels_getChannel`: Get channel information
 - `channels_listVideos`: List videos from a channel
 - `playlists_getPlaylist`: Get playlist details
 - `playlists_getPlaylistItems`: List items in a playlist
+
+### Enhanced Response Format
+
+Video-related tools now return structured objects with:
+
+```typescript
+{
+  // All original YouTube API data
+  snippet: { /* title, description, channelTitle, etc. */ },
+  statistics: { /* viewCount, likeCount, etc. */ },
+  contentDetails: { /* duration, etc. */ },
+
+  // NEW enhanced fields
+  url: "https://www.youtube.com/watch?v=VIDEO_ID",
+  videoId: "VIDEO_ID"
+}
+```
+
+### Version Management
+
+The server version is now dynamically read from `package.json` and automatically included in:
+
+- Server initialization
+- Logging messages
+- MCP protocol responses
 
 ## Build and Distribution
 

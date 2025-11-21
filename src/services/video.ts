@@ -13,6 +13,29 @@ export class VideoService {
   }
 
   /**
+   * Create a structured video object with URL
+   */
+  private createStructuredVideo(videoData: any): any {
+    if (!videoData) return null;
+
+    const videoId = videoData.id || videoData.id?.videoId;
+    const url = videoId ? `https://www.youtube.com/watch?v=${videoId}` : null;
+
+    return {
+      ...videoData,
+      url,
+      videoId
+    };
+  }
+
+  /**
+   * Create structured video objects with URLs for arrays
+   */
+  private createStructuredVideos(videos: any[]): any[] {
+    return videos.map(video => this.createStructuredVideo(video)).filter(Boolean);
+  }
+
+  /**
    * Initialize the YouTube client only when needed
    */
   private initialize() {
@@ -34,19 +57,20 @@ export class VideoService {
   /**
    * Get detailed information about a YouTube video
    */
-  async getVideo({ 
-    videoId, 
-    parts = ['snippet', 'contentDetails', 'statistics'] 
+  async getVideo({
+    videoId,
+    parts = ['snippet', 'contentDetails', 'statistics']
   }: VideoParams): Promise<any> {
     try {
       this.initialize();
-      
+
       const response = await this.youtube.videos.list({
         part: parts,
         id: [videoId]
       });
-      
-      return response.data.items?.[0] || null;
+
+      const videoData = response.data.items?.[0] || null;
+      return this.createStructuredVideo(videoData);
     } catch (error) {
       throw new Error(`Failed to get video: ${error instanceof Error ? error.message : String(error)}`);
     }
@@ -55,21 +79,22 @@ export class VideoService {
   /**
    * Search for videos on YouTube
    */
-  async searchVideos({ 
-    query, 
-    maxResults = 10 
+  async searchVideos({
+    query,
+    maxResults = 10
   }: SearchParams): Promise<any[]> {
     try {
       this.initialize();
-      
+
       const response = await this.youtube.search.list({
         part: ['snippet'],
         q: query,
         maxResults,
         type: ['video']
       });
-      
-      return response.data.items || [];
+
+      const videos = response.data.items || [];
+      return this.createStructuredVideos(videos);
     } catch (error) {
       throw new Error(`Failed to search videos: ${error instanceof Error ? error.message : String(error)}`);
     }
@@ -98,28 +123,28 @@ export class VideoService {
   /**
    * Get trending videos
    */
-  async getTrendingVideos({ 
-    regionCode = 'US', 
+  async getTrendingVideos({
+    regionCode = 'US',
     maxResults = 10,
     videoCategoryId = ''
   }: TrendingParams): Promise<any[]> {
     try {
       this.initialize();
-      
+
       const params: any = {
         part: ['snippet', 'contentDetails', 'statistics'],
         chart: 'mostPopular',
         regionCode,
         maxResults
       };
-      
+
       if (videoCategoryId) {
         params.videoCategoryId = videoCategoryId;
       }
-      
+
       const response = await this.youtube.videos.list(params);
-      
-      return response.data.items || [];
+      const videos = response.data.items || [];
+      return this.createStructuredVideos(videos);
     } catch (error) {
       throw new Error(`Failed to get trending videos: ${error instanceof Error ? error.message : String(error)}`);
     }
@@ -128,21 +153,22 @@ export class VideoService {
   /**
    * Get related videos for a specific video
    */
-  async getRelatedVideos({ 
-    videoId, 
-    maxResults = 10 
+  async getRelatedVideos({
+    videoId,
+    maxResults = 10
   }: RelatedVideosParams): Promise<any[]> {
     try {
       this.initialize();
-      
+
       const response = await this.youtube.search.list({
         part: ['snippet'],
         relatedToVideoId: videoId,
         maxResults,
         type: ['video']
       });
-      
-      return response.data.items || [];
+
+      const videos = response.data.items || [];
+      return this.createStructuredVideos(videos);
     } catch (error) {
       throw new Error(`Failed to get related videos: ${error instanceof Error ? error.message : String(error)}`);
     }

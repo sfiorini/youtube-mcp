@@ -1,5 +1,6 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
+import { createRequire } from 'node:module';
 import { VideoService } from './services/video.js';
 import { TranscriptService } from './services/transcript.js';
 import { PlaylistService } from './services/playlist.js';
@@ -11,10 +12,13 @@ export const configSchema = z.object({
     youtubeTranscriptLang: z.string().default("en").describe("Default language for YouTube transcripts"),
 });
 
+const require = createRequire(import.meta.url);
+const packageVersion = require('../../package.json').version;
+
 export default function createServer({ config }: { config?: z.infer<typeof configSchema> }) {
     const server = new McpServer({
         name: 'youtube-mcp',
-        version: '0.1.1',
+        version: packageVersion,
     });
 
     const videoService = new VideoService();
@@ -31,189 +35,157 @@ export default function createServer({ config }: { config?: z.infer<typeof confi
     }
 
     // Register tools
-    server.registerTool("videos_getVideo", {
-        title: "Get Video Information",
-        description: "Get detailed information about a YouTube video",
-        inputSchema: {
-            type: "object",
-            properties: {
-                videoId: {
-                    type: "string",
-                    description: "The YouTube video ID",
-                },
-                parts: {
-                    type: "array",
-                    description: "Parts of the video to retrieve",
-                    items: {
-                        type: "string",
-                    },
-                },
+    server.registerTool(
+        "videos_getVideo",
+        {
+            title: "Get Video Details",
+            description: "Get detailed information about a YouTube video including URL",
+            inputSchema: {
+                videoId: z.string().describe("The YouTube video ID"),
+                parts: z.array(z.string()).optional().describe("Parts of the video to retrieve"),
             },
-            required: ["videoId"],
+            outputSchema: z.any()
         },
-    }, async ({ videoId, parts }) => {
-        const result = await videoService.getVideo({ videoId, parts });
-        return {
-            content: [{
-                type: 'text',
-                text: JSON.stringify(result, null, 2)
-            }]
-        };
-    });
+        async ({ videoId, parts }) => {
+            const result = await videoService.getVideo({ videoId, parts });
+            return {
+                content: [{
+                    type: 'text',
+                    text: JSON.stringify(result, null, 2)
+                }]
+            };
+        }
+    );
 
-    server.registerTool("videos_searchVideos", {
-        title: "Search Videos",
-        description: "Search for videos on YouTube",
-        inputSchema: {
-            type: "object",
-            properties: {
-                query: {
-                    type: "string",
-                    description: "Search query",
-                },
-                maxResults: {
-                    type: "number",
-                    description: "Maximum number of results to return",
-                },
+    server.registerTool(
+        "videos_searchVideos",
+        {
+            title: "Search Videos",
+            description: "Search for videos on YouTube and return results with URLs",
+            inputSchema: {
+                query: z.string().describe("Search query"),
+                maxResults: z.number().optional().describe("Maximum number of results to return"),
             },
-            required: ["query"],
+            outputSchema: z.any()
         },
-    }, async ({ query, maxResults }) => {
-        const result = await videoService.searchVideos({ query, maxResults });
-        return {
-            content: [{
-                type: 'text',
-                text: JSON.stringify(result, null, 2)
-            }]
-        };
-    });
+        async ({ query, maxResults }) => {
+            const result = await videoService.searchVideos({ query, maxResults });
+            return {
+                content: [{
+                    type: 'text',
+                    text: JSON.stringify(result, null, 2)
+                }]
+            };
+        }
+    );
 
-    server.registerTool("transcripts_getTranscript", {
-        title: "Get Video Transcript",
-        description: "Get the transcript of a YouTube video",
-        inputSchema: {
-            type: "object",
-            properties: {
-                videoId: {
-                    type: "string",
-                    description: "The YouTube video ID",
-                },
-                language: {
-                    type: "string",
-                    description: "Language code for the transcript",
-                },
+    server.registerTool(
+        "transcripts_getTranscript",
+        {
+            title: "Get Video Transcript",
+            description: "Get the transcript of a YouTube video",
+            inputSchema: {
+                videoId: z.string().describe("The YouTube video ID"),
+                language: z.string().optional().describe("Language code for the transcript"),
             },
-            required: ["videoId"],
+            outputSchema: z.any()
         },
-    }, async ({ videoId, language }) => {
-        const result = await transcriptService.getTranscript({ videoId, language });
-        return {
-            content: [{
-                type: 'text',
-                text: JSON.stringify(result, null, 2)
-            }]
-        };
-    });
+        async ({ videoId, language }) => {
+            const result = await transcriptService.getTranscript({ videoId, language });
+            return {
+                content: [{
+                    type: 'text',
+                    text: JSON.stringify(result, null, 2)
+                }]
+            };
+        }
+    );
 
-    server.registerTool("channels_getChannel", {
-        title: "Get Channel Information",
-        description: "Get information about a YouTube channel",
-        inputSchema: {
-            type: "object",
-            properties: {
-                channelId: {
-                    type: "string",
-                    description: "The YouTube channel ID",
-                },
+    server.registerTool(
+        "channels_getChannel",
+        {
+            title: "Get Channel Information",
+            description: "Get information about a YouTube channel",
+            inputSchema: {
+                channelId: z.string().describe("The YouTube channel ID"),
             },
-            required: ["channelId"],
+            outputSchema: z.any()
         },
-    }, async ({ channelId }) => {
-        const result = await channelService.getChannel({ channelId });
-        return {
-            content: [{
-                type: 'text',
-                text: JSON.stringify(result, null, 2)
-            }]
-        };
-    });
+        async ({ channelId }) => {
+            const result = await channelService.getChannel({ channelId });
+            return {
+                content: [{
+                    type: 'text',
+                    text: JSON.stringify(result, null, 2)
+                }]
+            };
+        }
+    );
 
-    server.registerTool("channels_listVideos", {
-        title: "List Channel Videos",
-        description: "Get videos from a specific channel",
-        inputSchema: {
-            type: "object",
-            properties: {
-                channelId: {
-                    type: "string",
-                    description: "The YouTube channel ID",
-                },
-                maxResults: {
-                    type: "number",
-                    description: "Maximum number of results to return",
-                },
+    server.registerTool(
+        "channels_listVideos",
+        {
+            title: "List Channel Videos",
+            description: "Get videos from a specific channel",
+            inputSchema: {
+                channelId: z.string().describe("The YouTube channel ID"),
+                maxResults: z.number().optional().describe("Maximum number of results to return"),
             },
-            required: ["channelId"],
+            outputSchema: z.any()
         },
-    }, async ({ channelId, maxResults }) => {
-        const result = await channelService.listVideos({ channelId, maxResults });
-        return {
-            content: [{
-                type: 'text',
-                text: JSON.stringify(result, null, 2)
-            }]
-        };
-    });
+        async ({ channelId, maxResults }) => {
+            const result = await channelService.listVideos({ channelId, maxResults });
+            return {
+                content: [{
+                    type: 'text',
+                    text: JSON.stringify(result, null, 2)
+                }]
+            };
+        }
+    );
 
-    server.registerTool("playlists_getPlaylist", {
-        title: "Get Playlist Information",
-        description: "Get information about a YouTube playlist",
-        inputSchema: {
-            type: "object",
-            properties: {
-                playlistId: {
-                    type: "string",
-                    description: "The YouTube playlist ID",
-                },
+    server.registerTool(
+        "playlists_getPlaylist",
+        {
+            title: "Get Playlist Information",
+            description: "Get information about a YouTube playlist",
+            inputSchema: {
+                playlistId: z.string().describe("The YouTube playlist ID"),
             },
-            required: ["playlistId"],
+            outputSchema: z.any()
         },
-    }, async ({ playlistId }) => {
-        const result = await playlistService.getPlaylist({ playlistId });
-        return {
-            content: [{
-                type: 'text',
-                text: JSON.stringify(result, null, 2)
-            }]
-        };
-    });
+        async ({ playlistId }) => {
+            const result = await playlistService.getPlaylist({ playlistId });
+            return {
+                content: [{
+                    type: 'text',
+                    text: JSON.stringify(result, null, 2)
+                }]
+            };
+        }
+    );
 
-    server.registerTool("playlists_getPlaylistItems", {
-        title: "Get Playlist Items",
-        description: "Get videos in a YouTube playlist",
-        inputSchema: {
-            type: "object",
-            properties: {
-                playlistId: {
-                    type: "string",
-                    description: "The YouTube playlist ID",
-                },
-                maxResults: {
-                    type: "number",
-                    description: "Maximum number of results to return",
-                },
+    server.registerTool(
+        "playlists_getPlaylistItems",
+        {
+            title: "Get Playlist Items",
+            description: "Get videos in a YouTube playlist",
+            inputSchema: {
+                playlistId: z.string().describe("The YouTube playlist ID"),
+                maxResults: z.number().optional().describe("Maximum number of results to return"),
             },
-            required: ["playlistId"],
+            outputSchema: z.any()
         },
-    }, async ({ playlistId, maxResults }) => {
-        const result = await playlistService.getPlaylistItems({ playlistId, maxResults });
-        return {
-            content: [{
-                type: 'text',
-                text: JSON.stringify(result, null, 2)
-            }]
-        };
-    });
+        async ({ playlistId, maxResults }) => {
+            const result = await playlistService.getPlaylistItems({ playlistId, maxResults });
+            return {
+                content: [{
+                    type: 'text',
+                    text: JSON.stringify(result, null, 2)
+                }]
+            };
+        }
+    );
 
     return server.server;
 }
