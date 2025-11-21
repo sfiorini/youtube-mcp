@@ -1,7 +1,6 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { createStatelessServer } from '@smithery/sdk/server/stateless.js';
 import { z } from 'zod';
-import { createRequire } from 'node:module';
 import { VideoService } from './services/video.js';
 import { TranscriptService } from './services/transcript.js';
 import { PlaylistService } from './services/playlist.js';
@@ -13,8 +12,26 @@ export const configSchema = z.object({
     youtubeTranscriptLang: z.string().default("en").describe("Default language for YouTube transcripts"),
 });
 
-const require = createRequire(import.meta.url);
-const packageVersion = require('../../package.json').version;
+// Hardcoded version to avoid import.meta.url issues in Smithery builds
+const packageVersion = "0.1.2";
+
+// Initialize services eagerly to avoid initialization delays during requests
+let videoService: VideoService;
+let transcriptService: TranscriptService;
+let playlistService: PlaylistService;
+let channelService: ChannelService;
+
+function initializeServices() {
+    console.log(`[${new Date().toISOString()}] Initializing YouTube services`);
+    videoService = new VideoService();
+    transcriptService = new TranscriptService();
+    playlistService = new PlaylistService();
+    channelService = new ChannelService();
+    console.log(`[${new Date().toISOString()}] YouTube services initialization completed`);
+}
+
+// Eagerly initialize services
+initializeServices();
 
 export default function createServer({ config }: { config?: z.infer<typeof configSchema> }) {
     console.log(`[${new Date().toISOString()}] Starting YouTube MCP server initialization`);
@@ -32,12 +49,6 @@ export default function createServer({ config }: { config?: z.infer<typeof confi
         name: 'youtube-mcp',
         version: packageVersion,
     });
-
-    // Initialize services
-    const videoService = new VideoService();
-    const transcriptService = new TranscriptService();
-    const playlistService = new PlaylistService();
-    const channelService = new ChannelService();
 
     // Register tools
     mcpServer.registerTool(
