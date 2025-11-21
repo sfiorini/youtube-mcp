@@ -29,10 +29,10 @@ npm run prepublishOnly
 
 ### Core Structure
 
-The project uses a **modern service-based architecture** with the following layers:
+The project uses a **dual-architecture service-based design** with the following layers:
 
-1. **Entry Point** (`src/index.ts`): Validates required environment variables and starts the MCP server
-2. **Server** (`src/server.ts`): Uses modern `McpServer` with type-safe tool registration
+1. **Entry Point** (`src/index.ts`): Smithery-compatible `createServer` function for MCP platform deployment
+2. **CLI Server** (`src/server.ts`): Standalone MCP server with CLI entry point for `npx` usage
 3. **Services** (`src/services/`): Core business logic for interacting with YouTube APIs
    - `VideoService`: Handles video operations with **enhanced URL support** (get video details, search videos)
    - `TranscriptService`: Retrieves and manages video transcripts
@@ -87,7 +87,7 @@ server.registerTool(
       videoId: z.string().describe('The YouTube video ID'),
       parts: z.array(z.string()).optional().describe('Parts of the video to retrieve'),
     },
-    outputSchema: z.any()
+    // No outputSchema - allows standard MCP content format
   },
   async ({ videoId, parts }) => {
     const result = await videoService.getVideo({ videoId, parts });
@@ -123,13 +123,15 @@ The project uses **ES modules** (ESNext) as configured in:
 
 | File | Purpose |
 |------|---------|
-| `src/index.ts` | Entry point, validates YOUTUBE_API_KEY |
-| `src/server.ts` | MCP server setup and tool routing |
+| `src/index.ts` | Smithery-compatible `createServer` function for platform deployment |
+| `src/server.ts` | CLI MCP server with stdio transport for `npx` usage |
+| `src/cli.ts` | CLI wrapper that validates environment variables and starts server |
 | `src/services/video.ts` | Video lookup and search functionality |
 | `src/services/transcript.ts` | Video transcript retrieval |
 | `src/services/playlist.ts` | Playlist operations |
 | `src/services/channel.ts` | Channel information and video listing |
 | `src/types.ts` | TypeScript type definitions for all parameters |
+| `smithery.yaml` | Smithery deployment configuration |
 
 ## Configuration
 
@@ -177,19 +179,49 @@ Video-related tools now return structured objects with:
 
 ### Version Management
 
-The server version is now dynamically read from `package.json` and automatically included in:
+The server version is currently managed manually in the source files:
 
-- Server initialization
-- Logging messages
-- MCP protocol responses
+- Version is defined in `package.json` and mirrored in source files
+- Included in server initialization and logging messages
+- Updated for each release to maintain consistency
+
+## Deployment Options
+
+The package supports multiple deployment methods for different use cases:
+
+### CLI Deployment (for LibreChat, etc.)
+
+```bash
+npx -y @sfiorini/youtube-mcp@0.1.8
+```
+
+Uses the CLI entry point defined in the `bin` field of package.json.
+
+### Smithery Deployment
+
+The package exports a `createServer` function that follows Smithery patterns:
+
+```typescript
+import createServer from '@sfiorini/youtube-mcp';
+const server = createServer({ config });
+```
+
+### Direct Import
+
+For custom integrations, import the server function directly:
+
+```typescript
+import createServer from '@sfiorini/youtube-mcp';
+```
 
 ## Build and Distribution
 
 The project is published as an npm package (`@sfiorini/youtube-mcp`) and can be installed globally or used via npx. The build process:
 
 1. TypeScript compiles to JavaScript in `dist/` directory
-2. Binary entry point is set via `bin` field in package.json
-3. The `main` field points to `dist/index.js`
+2. Both CLI (`dist/cli.js`) and main entry point (`dist/index.js`) are generated
+3. The `main` field points to `dist/index.js` for Smithery compatibility
+4. The `bin` field points to `dist/cli.js` for CLI usage
 
 ## Testing and Validation
 
