@@ -1,6 +1,8 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { z } from 'zod';
 import { createRequire } from 'node:module';
+import express from 'express';
 import { VideoService } from './services/video.js';
 import { TranscriptService } from './services/transcript.js';
 import { PlaylistService } from './services/playlist.js';
@@ -15,17 +17,14 @@ export const configSchema = z.object({
 const require = createRequire(import.meta.url);
 const packageVersion = require('../../package.json').version;
 
-export default function createServer({ config }: { config?: z.infer<typeof configSchema> }) {
-    const server = new McpServer({
-        name: 'youtube-mcp',
-        version: packageVersion,
-    });
+// Create the MCP server instance once
+const mcpServer = new McpServer({
+    name: 'youtube-mcp',
+    version: packageVersion,
+});
 
-    const videoService = new VideoService();
-    const transcriptService = new TranscriptService();
-    const playlistService = new PlaylistService();
-    const channelService = new ChannelService();
-
+// Initialize services and register tools
+function initializeServer(config?: z.infer<typeof configSchema>) {
     // Set environment variables from config
     if (config?.youtubeApiKey) {
         process.env.YOUTUBE_API_KEY = config.youtubeApiKey;
@@ -34,8 +33,13 @@ export default function createServer({ config }: { config?: z.infer<typeof confi
         process.env.YOUTUBE_TRANSCRIPT_LANG = config.youtubeTranscriptLang;
     }
 
+    const videoService = new VideoService();
+    const transcriptService = new TranscriptService();
+    const playlistService = new PlaylistService();
+    const channelService = new ChannelService();
+
     // Register tools
-    server.registerTool(
+    mcpServer.registerTool(
         "videos_getVideo",
         {
             title: "Get Video Details",
@@ -57,7 +61,7 @@ export default function createServer({ config }: { config?: z.infer<typeof confi
         }
     );
 
-    server.registerTool(
+    mcpServer.registerTool(
         "videos_searchVideos",
         {
             title: "Search Videos",
@@ -79,7 +83,7 @@ export default function createServer({ config }: { config?: z.infer<typeof confi
         }
     );
 
-    server.registerTool(
+    mcpServer.registerTool(
         "transcripts_getTranscript",
         {
             title: "Get Video Transcript",
@@ -101,7 +105,7 @@ export default function createServer({ config }: { config?: z.infer<typeof confi
         }
     );
 
-    server.registerTool(
+    mcpServer.registerTool(
         "channels_getChannel",
         {
             title: "Get Channel Information",
@@ -122,7 +126,7 @@ export default function createServer({ config }: { config?: z.infer<typeof confi
         }
     );
 
-    server.registerTool(
+    mcpServer.registerTool(
         "channels_listVideos",
         {
             title: "List Channel Videos",
@@ -144,7 +148,7 @@ export default function createServer({ config }: { config?: z.infer<typeof confi
         }
     );
 
-    server.registerTool(
+    mcpServer.registerTool(
         "playlists_getPlaylist",
         {
             title: "Get Playlist Information",
@@ -165,7 +169,7 @@ export default function createServer({ config }: { config?: z.infer<typeof confi
         }
     );
 
-    server.registerTool(
+    mcpServer.registerTool(
         "playlists_getPlaylistItems",
         {
             title: "Get Playlist Items",
@@ -186,6 +190,68 @@ export default function createServer({ config }: { config?: z.infer<typeof confi
             };
         }
     );
+}
 
-    return server.server;
+export default function createServer({ config }: { config?: z.infer<typeof configSchema> }) {
+    // Initialize the server with config
+    initializeServer(config);
+
+    // Create Express app for HTTP transport
+    const app = express();
+    app.use(express.json());
+
+    // MCP endpoint
+    app.post('/mcp', async (req, res) => {
+        try {
+            // Create a new transport for each request (stateless)
+            const transport = new StreamableHTTPServerTransport({
+                sessionIdGenerator: undefined,
+                enableJsonResponse: true
+            });
+
+            res.on('close', () => {
+                transport.close();
+            });
+
+            await mcpServer.connect(transport);
+            await transport.handleRequest(req, res, req.body);
+        } catch (error) {
+            console.error('Error handling MCP request:', error);
+            if (!res.headersSent) {
+                res.status(500).json({
+                    jsonrpc: '2.0',
+                    error: {
+                        code: -32603,
+                        message: 'Internal server error'
+                    },
+                    id: null
+                });
+            }
+        }
+    });
+
+    // Health check endpoint
+    app.get('/health', (_req, res) => {
+        res.json({
+            status: 'healthy',
+            server: 'youtube-mcp',
+            version: packageVersion,
+            timestamp: new Date().toISOString()
+        });
+    });
+
+    // Root endpoint for basic info
+    app.get('/', (_req, res) => {
+        res.json({
+            name: 'YouTube MCP Server',
+            version: packageVersion,
+            description: 'MCP server for YouTube content management',
+            endpoints: {
+                mcp: '/mcp',
+                health: '/health'
+            }
+        });
+    });
+
+    return app;
 }
