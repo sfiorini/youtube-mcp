@@ -1,4 +1,4 @@
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { McpServer, ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
 import { VideoService } from './services/video.js';
@@ -26,9 +26,12 @@ export async function startMcpServer() {
     const channelService = new ChannelService();
 
     // Register resources
-    server.resource(
+    server.registerResource(
         'transcript',
-        'youtube://transcript/{videoId}',
+        new ResourceTemplate('youtube://transcript/{videoId}', { list: undefined }),
+        {
+            mimeType: 'application/json',
+        },
         async (uri, variables) => {
             const { videoId } = variables as unknown as { videoId: string };
             const result = await transcriptService.getTranscript({ videoId });
@@ -43,9 +46,14 @@ export async function startMcpServer() {
     );
 
     // Register prompts
-    server.prompt(
+    server.registerPrompt(
         'summarize-video',
-        { videoId: z.string().describe("The ID of the video to summarize") },
+        {
+            description: "Summarize a YouTube video",
+            argsSchema: {
+                videoId: z.string().describe("The ID of the video to summarize")
+            }
+        },
         ({ videoId }) => ({
             messages: [{
                 role: 'user',
@@ -57,9 +65,14 @@ export async function startMcpServer() {
         })
     );
 
-    server.prompt(
+    server.registerPrompt(
         'analyze-channel',
-        { channelId: z.string().describe("The ID of the channel to analyze") },
+        {
+            description: "Analyze a YouTube channel",
+            argsSchema: {
+                channelId: z.string().describe("The ID of the channel to analyze")
+            }
+        },
         ({ channelId }) => ({
             messages: [{
                 role: 'user',
