@@ -20,7 +20,8 @@
     "prepublishOnly": "npm run build",
     "smithery:build": "npx smithery build",
     "smithery:dev": "npx smithery dev",
-    "bump": "ts-node --esm scripts/release.ts"
+    "bump": "ts-node --esm scripts/release.ts",
+    "publish-npm": "npm publish --access public"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.1.1",
