@@ -6,7 +6,7 @@ import { TranscriptService } from './services/transcript.js';
 import { PlaylistService } from './services/playlist.js';
 import { ChannelService } from './services/channel.js';
 
-const packageVersion = '0.1.9';
+const packageVersion = '0.1.10';
 
 export async function startMcpServer() {
     const server = new McpServer({
