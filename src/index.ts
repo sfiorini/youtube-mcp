@@ -3,8 +3,8 @@ import { createYouTubeMcpServer } from './server-utils.js';
 
 // Configuration schema for Smithery
 export const configSchema = z.object({
-    youtubeApiKey: z.string().optional().describe("Your YouTube Data API key (can also be set via YOUTUBE_API_KEY environment variable)"),
-    youtubeTranscriptLang: z.string().default("en").describe("Default language for YouTube transcripts"),
+    youtubeApiKey: z.string().optional().describe("Your YouTube Data API v3 key. Required for all operations. Can also be provided via YOUTUBE_API_KEY environment variable."),
+    youtubeTranscriptLang: z.string().default("en").describe("Default language code for YouTube transcripts (e.g., 'en', 'es', 'fr', 'de')"),
 });
 
 // Required: Export default createServer function for Smithery

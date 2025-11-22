@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/sfiorini/youtube-mcp/.well-known/mcp-config",
+  "title": "YouTube MCP Server Configuration",
+  "description": "Configuration schema for the YouTube Model Context Protocol (MCP) Server. This server provides tools for accessing YouTube video information, transcripts, channel data, and playlists.",
+  "type": "object",
+  "properties": {
+    "youtubeApiKey": {
+      "type": "string",
+      "title": "YouTube Data API Key",
+      "description": "Your YouTube Data API v3 key. This is required for all YouTube operations. You can get one from the Google Cloud Console by enabling the YouTube Data API v3.",
+      "secret": true,
+      "examples": [
+        "AIzaSyDaGmWKa4JsXZ-vjHDWBGhYzu8v5c5-8"
+      ]
+    },
+    "youtubeTranscriptLang": {
+      "type": "string",
+      "title": "Default Transcript Language",
+      "description": "Default language code for YouTube video transcripts. If not specified, defaults to 'en'. Common codes: en (English), es (Spanish), fr (French), de (German), ja (Japanese), etc.",
+      "default": "en",
+      "examples": [
+        "en",
+        "es",
+        "fr",
+        "de",
+        "ja",
+        "pt"
+      ]
+    }
+  },
+  "required": [],
+  "additionalProperties": false,
+  "x-query-style": "dot+bracket",
+  "documentation": {
+    "gettingStarted": {
+      "title": "Getting Started",
+      "description": "1. Get a YouTube Data API v3 key from Google Cloud Console\n2. Provide the API key either in configuration or as YOUTUBE_API_KEY environment variable\n3. Optionally set a default transcript language\n4. Start using the YouTube MCP tools!"
+    },
+    "apiLink": "https://console.cloud.google.com/apis/library/youtube.googleapis.com",
+    "security": "Keep your API key secure and never expose it in client-side code"
+  }
+}
