@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://github.com/sfiorini/youtube-mcp/.well-known/mcp-config",
+  "$id": "http://smithery-1f4f267c-d6d8-4f88-8fed-228b834c308f.fly.dev/.well-known/mcp-config",
   "title": "YouTube MCP Server Configuration",
   "description": "Configuration schema for the YouTube Model Context Protocol (MCP) Server. This server provides tools for accessing YouTube video information, transcripts, channel data, and playlists.",
   "type": "object",

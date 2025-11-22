@@ -6,12 +6,12 @@ startCommand:
   args: ["dist/index.js"]
 config:
   properties:
-    YOUTUBE_API_KEY:
+    youtubeApiKey:
       type: string
-      description: "Your YouTube Data API v3 key. Can also be provided as environment variable."
+      description: "Your YouTube Data API v3 key. Can also be provided as YOUTUBE_API_KEY environment variable."
       secret: true
-    YOUTUBE_TRANSCRIPT_LANG:
+    youtubeTranscriptLang:
       type: string
-      description: "Default language for YouTube transcripts (e.g., 'en', 'es', 'fr')"
+      description: "Default language for YouTube transcripts (e.g., 'en', 'es', 'fr', 'de')"
       default: "en"
   required: []
