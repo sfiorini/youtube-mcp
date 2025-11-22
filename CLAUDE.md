@@ -15,6 +15,12 @@ npm install
 # Build TypeScript to JavaScript
 npm run build
 
+# Lint the codebase
+npm run lint
+
+# Run type checking
+npm run typecheck
+
 # Start the server
 npm start
 
@@ -35,7 +41,7 @@ npm run publish-npm
 The project uses a **dual-architecture service-based design** with the following layers:
 
 1. **Entry Point** (`src/index.ts`): Smithery-compatible `createServer` function for MCP platform deployment
-2. **CLI Server** (`src/server.ts`): Standalone MCP server with CLI entry point for `npx` usage
+2. **CLI Server** (`src/server.ts`): Standalone MCP server with CLI entry point for `npx` usage. **Registers tools, resources, and prompts.**
 3. **Services** (`src/services/`): Core business logic for interacting with YouTube APIs
    - `VideoService`: Handles video operations with **enhanced URL support** (get video details, search videos)
    - `TranscriptService`: Retrieves and manages video transcripts
@@ -69,12 +75,13 @@ This enhancement applies to:
 - ✅ Static version → Dynamic version from `package.json`
 - ✅ Basic error handling → Comprehensive error handling
 
-### MCP Tool Registration
+### MCP Tool Registration & Annotations
 
-Tools are registered in `src/server.ts` using the modern `McpServer.registerTool()` method (lines 25-187). Each tool has:
+Tools are registered in `src/server.ts` using the modern `McpServer.registerTool()` method. Each tool has:
 
 - A name following the pattern `{service}_{operation}` (e.g., `videos_getVideo`)
 - A title and description for the AI model
+- **Annotations**: Metadata like `readOnlyHint` and `idempotentHint` for better LLM interaction
 - Type-safe `zod` input schemas for validation
 - Async handler functions that return structured MCP responses
 
@@ -86,6 +93,7 @@ server.registerTool(
   {
     title: 'Get Video Details',
     description: 'Get detailed information about a YouTube video including URL',
+    annotations: { readOnlyHint: true, idempotentHint: true },
     inputSchema: {
       videoId: z.string().describe('The YouTube video ID'),
       parts: z.array(z.string()).optional().describe('Parts of the video to retrieve'),
@@ -104,11 +112,10 @@ server.registerTool(
 );
 ```
 
-This replaces the deprecated `setRequestHandler` approach with type-safe tool registration.
+### API Integration & Type Safety
 
-### API Integration
-
-Services use the **Google APIs Node.js client library** (`googleapis` package) with lazy initialization:
+Services use the **Google APIs Node.js client library** (`googleapis` package) with lazy initialization.
+The codebase prioritizes type safety by using `unknown` instead of `any` for API responses before validation/processing.
 
 - The YouTube API client is initialized only when needed (not in constructor)
 - API key is read from `YOUTUBE_API_KEY` environment variable at initialization time
@@ -127,7 +134,7 @@ The project uses **ES modules** (ESNext) as configured in:
 | File | Purpose |
 |------|---------|
 | `src/index.ts` | Smithery-compatible `createServer` function for platform deployment |
-| `src/server.ts` | CLI MCP server with stdio transport for `npx` usage |
+| `src/server.ts` | CLI MCP server with stdio transport. Registers tools, resources, and prompts. |
 | `src/cli.ts` | CLI wrapper that validates environment variables and starts server |
 | `src/services/video.ts` | Video lookup and search functionality |
 | `src/services/transcript.ts` | Video transcript retrieval |
@@ -146,17 +153,22 @@ The project uses **ES modules** (ESNext) as configured in:
 
 - `YOUTUBE_TRANSCRIPT_LANG`: Default language for transcripts (defaults to 'en')
 
-## Available Tools
+## Available Tools, Resources & Prompts
 
-The MCP server exposes these tools to clients with enhanced functionality:
+The MCP server exposes these capabilities:
+
+### Direct Resources
+- `youtube://transcript/{videoId}`: Direct access to video transcripts
+
+### Prompts
+- `summarize-video`: Workflow to get and summarize video content
+- `analyze-channel`: Workflow to analyze channel content strategy
 
 ### Video Tools (Enhanced with URLs)
-
 - `videos_getVideo`: Get detailed video information **including direct URL**
 - `videos_searchVideos`: Search for videos **with URLs in results**
 
 ### Other Tools
-
 - `transcripts_getTranscript`: Retrieve video transcript
 - `channels_getChannel`: Get channel information
 - `channels_listVideos`: List videos from a channel
@@ -233,6 +245,7 @@ The project was recently migrated to ES modules to fix compatibility issues with
 
 - Ensure all imports use `.js` extensions for relative imports
 - Verify TypeScript compiles without errors: `npm run build`
+- Run linting and type checking: `npm run lint && npm run typecheck`
 - Test the server can start: `npm start` (requires valid YOUTUBE_API_KEY)
 
 ## Important Notes
