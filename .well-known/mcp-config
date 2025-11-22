@@ -29,7 +29,7 @@
       ]
     }
   },
-  "required": ["youtubeApiKey"],
+  "required": [],
   "additionalProperties": false,
   "x-query-style": "dot+bracket",
   "documentation": {

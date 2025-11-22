@@ -14,5 +14,4 @@ config:
       type: string
       description: "Default language for YouTube transcripts (e.g., 'en', 'es', 'fr', 'de')"
       default: "en"
-  required:
-    - youtubeApiKey
+  required: []
