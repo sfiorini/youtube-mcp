@@ -30,8 +30,16 @@ export function createYouTubeMcpServer() {
     // Register resources
     server.registerResource(
         'transcript',
-        new ResourceTemplate('youtube://transcript/{videoId}', { list: undefined }),
+        new ResourceTemplate('youtube://transcript/{videoId}', {
+            list: async () => {
+                // Return an empty list since we can't enumerate all possible video IDs
+                // But the resource is still discoverable via direct URI access
+                return { resources: [] };
+            }
+        }),
         {
+            title: 'YouTube Video Transcript',
+            description: 'Get the transcript for a YouTube video. Use URI format: youtube://transcript/{videoId}',
             mimeType: 'application/json',
         },
         async (uri, variables) => {
