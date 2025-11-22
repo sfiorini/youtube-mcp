@@ -27,16 +27,50 @@ export function createYouTubeMcpServer() {
     const playlistService = new PlaylistService();
     const channelService = new ChannelService();
 
-    // Register resources
+    // Register static resource for Smithery discovery
+    server.registerResource(
+        'info',
+        'youtube://info',
+        {
+            title: 'YouTube MCP Server Information',
+            description: 'Information about available YouTube MCP resources and how to use them',
+            mimeType: 'application/json',
+        },
+        async (uri) => ({
+            contents: [{
+                uri: uri.href,
+                text: JSON.stringify({
+                    message: "YouTube MCP Server Resources",
+                    availableResources: {
+                        transcripts: {
+                            description: "Access YouTube video transcripts",
+                            uriPattern: "youtube://transcript/{videoId}",
+                            example: "youtube://transcript/dQw4w9WgXcQ",
+                            note: "Replace {videoId} with actual YouTube video ID"
+                        }
+                    },
+                    tools: [
+                        "videos_getVideo",
+                        "videos_searchVideos",
+                        "transcripts_getTranscript",
+                        "channels_getChannel",
+                        "channels_listVideos",
+                        "playlists_getPlaylist",
+                        "playlists_getPlaylistItems"
+                    ],
+                    prompts: [
+                        "summarize-video",
+                        "analyze-channel"
+                    ]
+                }, null, 2)
+            }]
+        })
+    );
+
+    // Register dynamic resource for transcripts
     server.registerResource(
         'transcript',
-        new ResourceTemplate('youtube://transcript/{videoId}', {
-            list: async () => {
-                // Return an empty list since we can't enumerate all possible video IDs
-                // But the resource is still discoverable via direct URI access
-                return { resources: [] };
-            }
-        }),
+        new ResourceTemplate('youtube://transcript/{videoId}', { list: undefined }),
         {
             title: 'YouTube Video Transcript',
             description: 'Get the transcript for a YouTube video. Use URI format: youtube://transcript/{videoId}',
