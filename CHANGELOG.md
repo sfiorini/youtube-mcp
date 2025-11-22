@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.9] - 2025-11-21
+
+### Added
+
+- Added `npm run bump` script to automate version bumping, file synchronization, and git tagging
+- Added `npm run publish-npm` script for streamlined building and publishing
+- Added `scripts/release.ts` to handle the release process logic
+
+### Improved
+
+- Automated the release workflow to reduce manual errors
+- Simplified the build-and-publish process for maintainers
+
 ## [0.1.8] - 2025-11-21
 
 ### Fixed
